@@ -16,6 +16,7 @@ import {
 } from '@solana/web3.js';
 import { Instructions } from './instructions';
 
+const POOL_PROGRAM_ID = '2CEHzrUfZv4sBR4tGh1vRLKFqUZvSKjeNRQvVB7A1eEh';
 export class Actions {
     private connection: Connection;
 
@@ -177,7 +178,68 @@ export class Actions {
         //   token_x: new PublicKey(result.token_x).toString(),
         //   token_y: new PublicKey(result.token_y).toString(),
         // };
-      }
+    }
+
+    async createPool(payer: PublicKey, tokenX: PublicKey, fee: number) {
+      const recentBlockhash = await this.connection.getRecentBlockhash();
+      const transaction = new Transaction({
+        recentBlockhash: recentBlockhash.blockhash,
+        feePayer: payer,
+      });
+
+      const {poolAccount, instruction} = await Instructions.createPoolAccountInstruction(this.connection,payer);
+      transaction.add(instruction);
+      const programId = new PublicKey(POOL_PROGRAM_ID);
+      const [poolAuthority, nonce] = await PublicKey.findProgramAddress(
+        [poolAccount.publicKey.toBuffer()],
+        programId,
+      );
+      const poolTokenXAccount = Keypair.generate();
+
+      transaction.add(
+        await Instructions.createTokenAccountInstruction(
+          this.connection,
+          payer,
+          poolTokenXAccount.publicKey,
+        ),
+        Instructions.createInitTokenAccountInstruction(
+          tokenX,
+          poolTokenXAccount.publicKey,
+          poolAuthority,
+        ),
+        
+        Instructions.createInitPoolInstruction(
+          {
+            poolAccount: poolAccount.publicKey,
+            authority: poolAuthority,
+            rootAdminAccount: payer,
+            tokenAccountX: poolTokenXAccount.publicKey,
+            payerAccount: payer,
+          },
+          {
+            fee,
+            nonce,
+          },
+        ),
+      );
+
+      const unsignedTransaction = Transaction.from(
+        transaction.serialize({
+          verifySignatures: false,
+          requireAllSignatures: false,
+        }),
+      );
+      const unsignedData = transaction.compileMessage().serialize();
+      transaction.sign(poolAccount, poolTokenXAccount);
+
+      return {
+        unsignedTransaction,
+        unsignedData,
+        transaction,
+        poolAccount,
+        poolTokenXAccount,
+      };
+    }
 
       
 }

@@ -8,6 +8,8 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { createTokenWithWalletAdapter } from "../../contexts/authentication/authentication";
 import { Actions } from "../../contexts/actions/actions";
 import { Account } from "@solana/web3.js";
+import { WRAPPED_SOL_MINT } from "@project-serum/serum/lib/token-instructions";
+import { sleep } from "../../contexts/actions/helper";
 
 export const FaucetView = () => {
   const connection = useConnection();
@@ -19,32 +21,44 @@ export const FaucetView = () => {
         return;
       }
 
-      return new Promise((resolve, reject) => {
-        const actions = new Actions(connection);
-        const poolProgramId = new PublicKey('2CEHzrUfZv4sBR4tGh1vRLKFqUZvSKjeNRQvVB7A1eEh');
-        return actions.actionTest(publicKey, publicKey, poolProgramId, 1)
-        .then(({ rawTx }) => {
-          return parseAndSendTransaction(rawTx);
-        })
-        .then(txId => {
-          resolve(txId.toString());
-          console.log(txId, '-----------tx');
-          
-        })
-        .catch(err => {
-          console.log({ err });
-          if (!err.message || err.message !== 'Transaction cancelled') {
-            reject({
-              message: 'Error while join pool',
-              err,
-            });
-          } else {
-            reject({ message: 'Transaction cancelled' });
-          }
-        })
-        .finally(() => {
-        });
+      const actions = new Actions(connection);
+      const { poolTokenXAccount, poolAccount, transaction, unsignedTransaction } = await actions.createPool(publicKey, WRAPPED_SOL_MINT, 3);
+      const signedTxWithWallet = await signTransaction!(unsignedTransaction);
+      const sign = signedTxWithWallet.signatures[0];
+      transaction.addSignature(sign.publicKey, sign.signature as Buffer);
+      await connection.sendRawTransaction(transaction.serialize(), {
+        skipPreflight: false,
+        preflightCommitment: 'confirmed',
       });
+      await sleep(2000);
+      console.log(poolTokenXAccount.publicKey.toBase58(), '---', poolAccount.publicKey.toString(), '---', transaction, '---', unsignedTransaction);
+      
+      // return new Promise((resolve, reject) => {
+      //   const actions = new Actions(connection);
+      //   const poolProgramId = new PublicKey('2CEHzrUfZv4sBR4tGh1vRLKFqUZvSKjeNRQvVB7A1eEh');
+      //   return actions.actionTest(publicKey, publicKey, poolProgramId, 1)
+      //   .then(({ rawTx }) => {
+      //     return parseAndSendTransaction(rawTx);
+      //   })
+      //   .then(txId => {
+      //     resolve(txId.toString());
+      //     console.log(txId, '-----------tx');
+          
+      //   })
+      //   .catch(err => {
+      //     console.log({ err });
+      //     if (!err.message || err.message !== 'Transaction cancelled') {
+      //       reject({
+      //         message: 'Error while join pool',
+      //         err,
+      //       });
+      //     } else {
+      //       reject({ message: 'Transaction cancelled' });
+      //     }
+      //   })
+      //   .finally(() => {
+      //   });
+      // });
     } catch (error) {
       notify({
         message: LABELS.AIRDROP_FAIL,
@@ -70,7 +84,8 @@ export const FaucetView = () => {
     const txId = await sendAndConfirmTransaction(transaction);
     return txId;
   }
-  
+
+
   async function sendAndConfirmTransaction(
     transaction: Transaction,
     ...signers: Account[]
