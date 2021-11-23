@@ -21,42 +21,42 @@ export const FaucetView = () => {
         return;
       }
 
-      // const actions = new Actions(connection);
-      // await actions.readPool(new PublicKey('Cr6xj8ZpTD4o143iD5KN4FnmkWqhegNbf6W7WRosoPMr'));
+      const actions = new Actions(connection);
+      await actions.readPool(new PublicKey('CxP4knNndD9pR1EKXjFouz4YH9VR6NqSZ793EDT7g1LH'));
 
 
 
       // -------------------------DEPOSIT------------------------
-      return new Promise((resolve, reject) => {
-        console.log('---start 1');
+      // return new Promise((resolve, reject) => {
+      //   console.log('---start 1');
         
-        const actions = new Actions(connection);
-        const POOL_CONTRACT_ADDRESS = 'GYffE8zQXCwTYwnniXVrD4ETAJGgXqfLFaPMkhvwCYCq';
-        const poolProgramId = new PublicKey('8jsjZQTTWNqayoojyGjS2NjWEUjJgxcWvHorBhopQGWg');
-        return actions.deposit(publicKey, publicKey, new PublicKey(POOL_CONTRACT_ADDRESS), 2)
-        .then(({ rawTx }) => {
-          return parseAndSendTransaction(rawTx);
-        })
-        .then(txId => {
-          resolve(txId.toString());
-          console.log(txId, '-----------tx');
-          // encode to generate txNote
+      //   const actions = new Actions(connection);
+      //   const POOL_CONTRACT_ADDRESS = 'GYffE8zQXCwTYwnniXVrD4ETAJGgXqfLFaPMkhvwCYCq';
+      //   const poolProgramId = new PublicKey('8jsjZQTTWNqayoojyGjS2NjWEUjJgxcWvHorBhopQGWg');
+      //   return actions.deposit(publicKey, publicKey, new PublicKey(POOL_CONTRACT_ADDRESS), 2)
+      //   .then(({ rawTx }) => {
+      //     return parseAndSendTransaction(rawTx);
+      //   })
+      //   .then(txId => {
+      //     resolve(txId.toString());
+      //     console.log(txId, '-----------tx');
+      //     // encode to generate txNote
           
-        })
-        .catch(err => {
-          console.log({ err });
-          if (!err.message || err.message !== 'Transaction cancelled') {
-            reject({
-              message: 'Error while join pool',
-              err,
-            });
-          } else {
-            reject({ message: 'Transaction cancelled' });
-          }
-        })
-        .finally(() => {
-        });
-      });
+      //   })
+      //   .catch(err => {
+      //     console.log({ err });
+      //     if (!err.message || err.message !== 'Transaction cancelled') {
+      //       reject({
+      //         message: 'Error while join pool',
+      //         err,
+      //       });
+      //     } else {
+      //       reject({ message: 'Transaction cancelled' });
+      //     }
+      //   })
+      //   .finally(() => {
+      //   });
+      // });
 
       // --------------------------------------------------------
       
