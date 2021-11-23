@@ -21,44 +21,66 @@ export const FaucetView = () => {
         return;
       }
 
-      const actions = new Actions(connection);
-      const { poolTokenXAccount, poolAccount, transaction, unsignedTransaction } = await actions.createPool(publicKey, WRAPPED_SOL_MINT, 3);
-      const signedTxWithWallet = await signTransaction!(unsignedTransaction);
-      const sign = signedTxWithWallet.signatures[0];
-      transaction.addSignature(sign.publicKey, sign.signature as Buffer);
-      await connection.sendRawTransaction(transaction.serialize(), {
-        skipPreflight: false,
-        preflightCommitment: 'confirmed',
-      });
-      await sleep(2000);
-      console.log(poolTokenXAccount.publicKey.toBase58(), '---', poolAccount.publicKey.toString(), '---', transaction, '---', unsignedTransaction);
-      
-      // return new Promise((resolve, reject) => {
-      //   const actions = new Actions(connection);
-      //   const poolProgramId = new PublicKey('2CEHzrUfZv4sBR4tGh1vRLKFqUZvSKjeNRQvVB7A1eEh');
-      //   return actions.actionTest(publicKey, publicKey, poolProgramId, 1)
-      //   .then(({ rawTx }) => {
-      //     return parseAndSendTransaction(rawTx);
-      //   })
-      //   .then(txId => {
-      //     resolve(txId.toString());
-      //     console.log(txId, '-----------tx');
+      // const actions = new Actions(connection);
+      // await actions.readPool(new PublicKey('Cr6xj8ZpTD4o143iD5KN4FnmkWqhegNbf6W7WRosoPMr'));
+
+
+
+      // -------------------------DEPOSIT------------------------
+      return new Promise((resolve, reject) => {
+        console.log('---start 1');
+        
+        const actions = new Actions(connection);
+        const POOL_CONTRACT_ADDRESS = 'Cr6xj8ZpTD4o143iD5KN4FnmkWqhegNbf6W7WRosoPMr';
+        const poolProgramId = new PublicKey('2CEHzrUfZv4sBR4tGh1vRLKFqUZvSKjeNRQvVB7A1eEh');
+        return actions.deposit(publicKey, publicKey, new PublicKey(POOL_CONTRACT_ADDRESS), 2)
+        .then(({ rawTx }) => {
+          return parseAndSendTransaction(rawTx);
+        })
+        .then(txId => {
+          resolve(txId.toString());
+          console.log(txId, '-----------tx');
+          // encode to generate txNote
           
-      //   })
-      //   .catch(err => {
-      //     console.log({ err });
-      //     if (!err.message || err.message !== 'Transaction cancelled') {
-      //       reject({
-      //         message: 'Error while join pool',
-      //         err,
-      //       });
-      //     } else {
-      //       reject({ message: 'Transaction cancelled' });
-      //     }
-      //   })
-      //   .finally(() => {
-      //   });
+        })
+        .catch(err => {
+          console.log({ err });
+          if (!err.message || err.message !== 'Transaction cancelled') {
+            reject({
+              message: 'Error while join pool',
+              err,
+            });
+          } else {
+            reject({ message: 'Transaction cancelled' });
+          }
+        })
+        .finally(() => {
+        });
+      });
+
+      // --------------------------------------------------------
+      
+
+
+
+
+
+
+      //  /*---------------------CREATE POOL--------------------------------
+      // const actions = new Actions(connection);
+      // const { poolTokenXAccount, poolAccount, transaction, unsignedTransaction } = await actions.createPool(publicKey, WRAPPED_SOL_MINT, 3);
+      // const signedTxWithWallet = await signTransaction!(unsignedTransaction);
+      // const sign = signedTxWithWallet.signatures[0];
+      // transaction.addSignature(sign.publicKey, sign.signature as Buffer);
+      // await connection.sendRawTransaction(transaction.serialize(), {
+      //   skipPreflight: false,
+      //   preflightCommitment: 'confirmed',
       // });
+      // await sleep(2000);
+      // console.log('token x: ', poolTokenXAccount.publicKey.toBase58(), '--- poolAccont', poolAccount.publicKey.toString(), '---', transaction, '---', unsignedTransaction);
+      // ---------------------------END OF CREATE POOL-------------------------------------------------*/
+
+      
     } catch (error) {
       notify({
         message: LABELS.AIRDROP_FAIL,

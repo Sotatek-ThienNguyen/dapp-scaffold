@@ -5,15 +5,14 @@ import * as Layout from './layout';
 export const PoolLayout = BufferLayout.struct([
     BufferLayout.u8('nonce'),
     Layout.publicKey('token_x'),
-    Layout.publicKey('admin'),
-    Layout.publicKey('root_admin'),
+    BufferLayout.u8('fee'),
     BufferLayout.nu64('fee_amount'),
-    Layout.rate('fees'),
+    Layout.publicKey('root_admin'),
+    Layout.publicKey('admin'),
 ]);
 
 export const InitPoolLayout = [
     BufferLayout.u8('instruction'),
     BufferLayout.u8('nonce'),
-    Layout.publicKey('token_x'),
-    Layout.rate('fees'),
+    BufferLayout.u8('fee'),
 ];

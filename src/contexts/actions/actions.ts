@@ -6,6 +6,7 @@ import {
   TOKEN_PROGRAM_ID,
   u64,
 } from '@solana/spl-token';
+import Decimal from 'decimal.js';
 import {
   Connection,
   Keypair,
@@ -14,7 +15,9 @@ import {
   SystemProgram,
   Transaction,
 } from '@solana/web3.js';
+import { PoolLayout } from './contractLayout';
 import { Instructions } from './instructions';
+import { IExtractPoolData } from './interface';
 
 const POOL_PROGRAM_ID = '2CEHzrUfZv4sBR4tGh1vRLKFqUZvSKjeNRQvVB7A1eEh';
 export class Actions {
@@ -54,97 +57,88 @@ export class Actions {
       };
     }
 
-    // public async earlyJoin(
-    //     payer: PublicKey,
-    //     userAddress: PublicKey,
-    //     poolAddress: PublicKey,
-    //     amount: number,
-    //   ) {
-    //     const {blockhash} = await this.connection.getRecentBlockhash();
-    //     const transaction = new Transaction({
-    //       recentBlockhash: blockhash,
-    //       feePayer: payer,
-    //     });
-    //     const poolProgramId = await this.getPoolProgramId(poolAddress);
-    //     const {token_x} = await this.readPool(poolAddress);
-    //     const authority = await this.findPoolAuthority(poolAddress);
-    //     const wrappedUserAddress = await this.findAssociatedTokenAddress(userAddress, WRAPPED_SOL_MINT);
-    //     const {
-    //       exists: isExisted,
-    //       associatedAddress: poolMemberAccount,
-    //     } = await this.getPoolAssociatedAccountInfo(userAddress, poolAddress);
+    public async getLamportPerSignature(blockhash: any): Promise<number> {
+      const feeCalculator = await this.connection.getFeeCalculatorForBlockhash(blockhash);
+  
+      const lamportsPerSignature =
+        feeCalculator && feeCalculator.value ? feeCalculator.value.lamportsPerSignature : 0;
+  
+      return lamportsPerSignature;
+    }
+
+    public async deposit(
+        payer: PublicKey,
+        userAddress: PublicKey,
+        poolAddress: PublicKey,
+        amount: number,
+      ) {
+        const {blockhash} = await this.connection.getRecentBlockhash();
+        const transaction = new Transaction({
+          recentBlockhash: blockhash,
+          feePayer: payer,
+        });
+        const poolProgramId = await this.getPoolProgramId(poolAddress);
+        const {token_x} = await this.readPool(poolAddress);
+        const authority = await this.findPoolAuthority(poolAddress);
+        const wrappedUserAddress = await this.findAssociatedTokenAddress(userAddress, WRAPPED_SOL_MINT);
+   
+        const txFee = await this.getLamportPerSignature(blockhash);
+        const rentFee = await this.connection.getMinimumBalanceForRentExemption(AccountLayout.span);
     
-    //     if (!isExisted) {
-    //       // create joined user data if not exists
-    //       transaction.add(
-    //         Instructions.createAssociatedPoolAccountInstruction(
-    //           payer,
-    //           new PublicKey(userAddress),
-    //           new PublicKey(poolAddress),
-    //           new PublicKey(poolMemberAccount),
-    //           poolProgramId,
-    //         ),
-    //       );
-    //     }
+        transaction.add(
+          SystemProgram.transfer({
+            fromPubkey: userAddress,
+            toPubkey: wrappedUserAddress,
+            lamports: amount * LAMPORTS_PER_SOL + rentFee,
+          }),
+          Instructions.createAssociatedTokenAccountInstruction(
+            payer,
+            userAddress,
+            WRAPPED_SOL_MINT,
+            wrappedUserAddress,
+          ),
+          Instructions.createApproveInstruction({
+            programId: TOKEN_PROGRAM_ID,
+            source: wrappedUserAddress,
+            delegate: authority,
+            owner: userAddress,
+            amount: amount * LAMPORTS_PER_SOL + rentFee,
+            signers: [userAddress],
+          }),
+          Instructions.deposit(
+            {
+              poolAccount: poolAddress,
+              userAuthority: authority,
+              userAccount: userAddress,
+              userSourceTokenAccount: wrappedUserAddress,
+              poolSourceTokenAccount: new PublicKey(token_x),
+              tokenProgramId: TOKEN_PROGRAM_ID,
+            },
+            {
+              incoming_amount: amount * LAMPORTS_PER_SOL,
+            },
+            poolProgramId,
+          ),
+          Instructions.closeAccountInstruction({
+            programId: TOKEN_PROGRAM_ID,
+            account: wrappedUserAddress,
+            dest: userAddress,
+            owner: userAddress,
+            signers: [],
+          }),
+        );
     
-    //     const txFee = await this.getLamportPerSignature(blockhash);
-    //     const rentFee = await this.connection.getMinimumBalanceForRentExemption(AccountLayout.span);
+        const rawTx = transaction.serialize({
+          requireAllSignatures: false,
+          verifySignatures: false,
+        });
     
-    //     transaction.add(
-    //       SystemProgram.transfer({
-    //         fromPubkey: userAddress,
-    //         toPubkey: wrappedUserAddress,
-    //         lamports: amount * LAMPORTS_PER_SOL + rentFee,
-    //       }),
-    //       Instructions.createAssociatedTokenAccountInstruction(
-    //         payer,
-    //         userAddress,
-    //         WRAPPED_SOL_MINT,
-    //         wrappedUserAddress,
-    //       ),
-    //       Instructions.createApproveInstruction({
-    //         programId: TOKEN_PROGRAM_ID,
-    //         source: wrappedUserAddress,
-    //         delegate: authority,
-    //         owner: userAddress,
-    //         amount: amount * LAMPORTS_PER_SOL + rentFee,
-    //         signers: [userAddress],
-    //       }),
-    //       Instructions.createEarlyJoinPoolInstruction(
-    //         {
-    //           poolAccount: poolAddress,
-    //           userAuthority: authority,
-    //           userAccount: userAddress,
-    //           poolMemberAccount,
-    //           userSourceTokenAccount: wrappedUserAddress,
-    //           poolSourceTokenAccount: new PublicKey(token_x),
-    //           tokenProgramId: TOKEN_PROGRAM_ID,
-    //         },
-    //         {
-    //           incoming_amount: amount * LAMPORTS_PER_SOL,
-    //         },
-    //         poolProgramId,
-    //       ),
-    //       Instructions.closeAccountInstruction({
-    //         programId: TOKEN_PROGRAM_ID,
-    //         account: wrappedUserAddress,
-    //         dest: userAddress,
-    //         owner: userAddress,
-    //         signers: [],
-    //       }),
-    //     );
-    
-    //     const rawTx = transaction.serialize({
-    //       requireAllSignatures: false,
-    //       verifySignatures: false,
-    //     });
-    
-    //     return {
-    //       rawTx,
-    //       txFee,
-    //       unsignedTransaction: transaction,
-    //     };
-    // }
+        return {
+          rawTx,
+          txFee,
+          unsignedTransaction: transaction,
+        };
+    }
 
     public async getPoolProgramId(poolAddress: PublicKey): Promise<PublicKey> {
         return this.getOwner(poolAddress);
@@ -159,17 +153,54 @@ export class Actions {
         return new PublicKey(pool_acc.owner);
     }
 
-    async readPool(
-        poolAddress: PublicKey,
-        tokenDecimalsInput?: number,
-        tokenToDecimalsInput?: number,
-      ) {
-        // const accountInfo = await this.connection.getAccountInfo(poolAddress);
-        // if (!accountInfo) {
-        //   throw new Error('Can not find pool address');
-        // }
+    async findPoolAuthority(poolAddress: PublicKey): Promise<PublicKey> {
+      const programId = await this.getPoolProgramId(poolAddress);
+      const [authority] = await PublicKey.findProgramAddress([poolAddress.toBuffer()], programId);
+      return authority;
+    }
 
-        // const result = PoolLayout.decode(Buffer.from(accountInfo.data));
+     /**
+   * Get associated address of target address and can mint token
+   *
+   * @param targetAddress PublicKey (target address need to find associated)
+   * @param tokenMintAddress PublicKey (token can be mint by associated address)
+   * @returns Promise<PublicKey>
+   */
+  async findAssociatedTokenAddress(
+    targetAddress: PublicKey,
+    tokenMintAddress: PublicKey,
+  ): Promise<PublicKey> {
+    return (
+      await PublicKey.findProgramAddress(
+        [targetAddress.toBuffer(), TOKEN_PROGRAM_ID.toBuffer(), tokenMintAddress.toBuffer()],
+        ASSOCIATED_TOKEN_PROGRAM_ID,
+      )
+    )[0];
+  }
+
+    async readPool(
+        poolAddress: PublicKey
+      ): Promise<IExtractPoolData> {
+        const accountInfo = await this.connection.getAccountInfo(poolAddress);
+        if (!accountInfo) {
+          throw new Error('Can not find pool address');
+        }
+        console.log(accountInfo, '----account info');
+        
+
+        const result = PoolLayout.decode(Buffer.from(accountInfo.data));
+        
+        const poolData = {
+          nonce: result.nonce,
+          root_admin: new PublicKey(result.root_admin).toString(),
+          admin: new PublicKey(result.admin).toString(),
+          token_x: new PublicKey(result.token_x).toString(),
+          fee_amount: new Decimal(result.fee_amount).toNumber()
+        }
+        console.log(poolData, '---poolData');
+        return poolData;
+        
+        
     
         // return {
         //   is_initialized: result.is_initialized,
@@ -194,6 +225,8 @@ export class Actions {
         [poolAccount.publicKey.toBuffer()],
         programId,
       );
+      console.log(nonce, '-----nonce-------');
+      
       const poolTokenXAccount = Keypair.generate();
 
       transaction.add(
