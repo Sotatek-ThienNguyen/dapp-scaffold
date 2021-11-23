@@ -6,7 +6,7 @@ import { InitPoolLayout, PoolLayout } from "./contractLayout";
 import * as Layout from './layout';
 import {Numberu64} from './layout';
 
-const POOL_PROGRAM_ID = '2CEHzrUfZv4sBR4tGh1vRLKFqUZvSKjeNRQvVB7A1eEh';
+const POOL_PROGRAM_ID = '8jsjZQTTWNqayoojyGjS2NjWEUjJgxcWvHorBhopQGWg';
 export class Instructions {
     static createDepositInstruction(
         accounts: {

@@ -19,7 +19,7 @@ import { PoolLayout } from './contractLayout';
 import { Instructions } from './instructions';
 import { IExtractPoolData } from './interface';
 
-const POOL_PROGRAM_ID = '2CEHzrUfZv4sBR4tGh1vRLKFqUZvSKjeNRQvVB7A1eEh';
+const POOL_PROGRAM_ID = '8jsjZQTTWNqayoojyGjS2NjWEUjJgxcWvHorBhopQGWg';
 export class Actions {
     private connection: Connection;
 

@@ -31,8 +31,8 @@ export const FaucetView = () => {
         console.log('---start 1');
         
         const actions = new Actions(connection);
-        const POOL_CONTRACT_ADDRESS = 'Cr6xj8ZpTD4o143iD5KN4FnmkWqhegNbf6W7WRosoPMr';
-        const poolProgramId = new PublicKey('2CEHzrUfZv4sBR4tGh1vRLKFqUZvSKjeNRQvVB7A1eEh');
+        const POOL_CONTRACT_ADDRESS = 'GYffE8zQXCwTYwnniXVrD4ETAJGgXqfLFaPMkhvwCYCq';
+        const poolProgramId = new PublicKey('8jsjZQTTWNqayoojyGjS2NjWEUjJgxcWvHorBhopQGWg');
         return actions.deposit(publicKey, publicKey, new PublicKey(POOL_CONTRACT_ADDRESS), 2)
         .then(({ rawTx }) => {
           return parseAndSendTransaction(rawTx);
