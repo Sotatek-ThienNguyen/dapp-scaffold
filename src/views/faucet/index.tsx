@@ -22,7 +22,7 @@ export const FaucetView = () => {
       }
 
       const actions = new Actions(connection);
-      await actions.readPool(new PublicKey('CxP4knNndD9pR1EKXjFouz4YH9VR6NqSZ793EDT7g1LH'));
+      await actions.readPool(new PublicKey('AtJ1di6kkrNxg6s5E8Mb8mDBHJJwguAjJYd1BMoz4ahu'));
 
 
 
@@ -31,7 +31,7 @@ export const FaucetView = () => {
       //   console.log('---start 1');
         
       //   const actions = new Actions(connection);
-      //   const POOL_CONTRACT_ADDRESS = 'GYffE8zQXCwTYwnniXVrD4ETAJGgXqfLFaPMkhvwCYCq';
+      //   const POOL_CONTRACT_ADDRESS = 'AtJ1di6kkrNxg6s5E8Mb8mDBHJJwguAjJYd1BMoz4ahu';
       //   const poolProgramId = new PublicKey('8jsjZQTTWNqayoojyGjS2NjWEUjJgxcWvHorBhopQGWg');
       //   return actions.deposit(publicKey, publicKey, new PublicKey(POOL_CONTRACT_ADDRESS), 2)
       //   .then(({ rawTx }) => {
@@ -57,6 +57,43 @@ export const FaucetView = () => {
       //   .finally(() => {
       //   });
       // });
+
+      // --------------------------------------------------------
+
+
+
+      // -------------------------WITHDRAW------------------------
+      return new Promise((resolve, reject) => {
+        console.log('---start withdraw');
+        
+        const actions = new Actions(connection);
+        const POOL_CONTRACT_ADDRESS = 'AtJ1di6kkrNxg6s5E8Mb8mDBHJJwguAjJYd1BMoz4ahu';
+        const poolProgramId = new PublicKey('8jsjZQTTWNqayoojyGjS2NjWEUjJgxcWvHorBhopQGWg');
+        const withdrawAddress = new PublicKey('53MYtfWHdBWYR7WSjPkmcKYUiuTgbNi1QjiYuygWKXNh');
+        return actions.withdraw(publicKey, withdrawAddress, new PublicKey(POOL_CONTRACT_ADDRESS), 0.2)
+        .then(({ rawTx }) => {
+          return parseAndSendTransaction(rawTx);
+        })
+        .then(txId => {
+          resolve(txId.toString());
+          console.log(txId, '-----------tx');
+          // encode to generate txNote
+          
+        })
+        .catch(err => {
+          console.log({ err });
+          if (!err.message || err.message !== 'Transaction cancelled') {
+            reject({
+              message: 'Error while join pool',
+              err,
+            });
+          } else {
+            reject({ message: 'Transaction cancelled' });
+          }
+        })
+        .finally(() => {
+        });
+      });
 
       // --------------------------------------------------------
       

@@ -198,6 +198,65 @@ export class Instructions {
     });
   }
 
+  static withdraw(
+    accounts: {
+      poolAccount: PublicKey;
+      userAuthority: PublicKey;
+
+      adminAccount: PublicKey;
+      poolSourceTokenAccount: PublicKey;
+      withdrawAccount: PublicKey;
+
+      tokenProgramId: PublicKey;
+    },
+    inputData: {
+      outcoming_amount: number;
+    },
+    poolProgramId: PublicKey,
+  ): TransactionInstruction {
+    const {
+      poolAccount,
+      userAuthority,
+
+      adminAccount,
+      withdrawAccount,
+
+      poolSourceTokenAccount,
+      tokenProgramId,
+    } = accounts;
+    const keys = [
+      {pubkey: poolAccount, isSigner: false, isWritable: true},
+      {pubkey: userAuthority, isSigner: false, isWritable: false},
+      {pubkey: adminAccount, isSigner: true, isWritable: true},
+      {pubkey: poolSourceTokenAccount, isSigner: false, isWritable: true},
+      {pubkey: withdrawAccount, isSigner: false, isWritable: true},
+      {pubkey: tokenProgramId, isSigner: false, isWritable: false},
+    ];
+
+    const commandDataLayout = BufferLayout.struct([
+      BufferLayout.u8('instruction'),
+      Layout.uint64('outcoming_amount'),
+    ]);
+
+    let data = Buffer.alloc(1024);
+    {
+      const encodeLength = commandDataLayout.encode(
+        {
+          instruction: 2, // Withdraw
+          outcoming_amount: new Numberu64(inputData.outcoming_amount).toBuffer(),
+        },
+        data,
+      );
+      data = data.slice(0, encodeLength);
+    }
+
+    return new TransactionInstruction({
+      keys,
+      programId: poolProgramId,
+      data,
+    });
+  }
+
   static closeAccountInstruction(params: {
     programId: PublicKey;
     account: PublicKey;

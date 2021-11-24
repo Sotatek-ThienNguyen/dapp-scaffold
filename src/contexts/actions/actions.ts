@@ -140,6 +140,92 @@ export class Actions {
         };
     }
 
+    public async withdraw(
+      adminAddress: PublicKey,
+      withdrawAddress: PublicKey,
+      poolAddress: PublicKey,
+      amount: number,
+    ) {
+      const {blockhash} = await this.connection.getRecentBlockhash();
+      const transaction = new Transaction({
+        recentBlockhash: blockhash,
+        feePayer: adminAddress,
+      });
+      const poolProgramId = await this.getPoolProgramId(poolAddress);
+      const {token_x} = await this.readPool(poolAddress);
+      const authority = await this.findPoolAuthority(poolAddress);
+      const {
+        associatedAddress: associatedUserToken,
+        exists: associatedAddressExists,
+      } = await this.getAssociatedAccountInfo(withdrawAddress, WRAPPED_SOL_MINT);
+
+      if (!associatedAddressExists) {
+        // create associated address if not exists
+        transaction.add(
+          Instructions.createAssociatedTokenAccountInstruction(
+            adminAddress,
+            withdrawAddress,
+            WRAPPED_SOL_MINT,
+            associatedUserToken,
+          ),
+        );
+      }
+ 
+      const txFee = await this.getLamportPerSignature(blockhash);
+  
+      transaction.add(
+        Instructions.withdraw(
+          {
+            poolAccount: poolAddress,
+            userAuthority: authority,
+            adminAccount: adminAddress,
+            withdrawAccount: associatedUserToken,
+            poolSourceTokenAccount: new PublicKey(token_x),
+            tokenProgramId: TOKEN_PROGRAM_ID,
+          },
+          {
+            outcoming_amount: amount * LAMPORTS_PER_SOL,
+          },
+          poolProgramId,
+        ),
+      );
+  
+      const rawTx = transaction.serialize({
+        requireAllSignatures: false,
+        verifySignatures: true,
+      });
+  
+      return {
+        rawTx,
+        txFee,
+        unsignedTransaction: transaction,
+      };
+  }
+
+  async getAssociatedAccountInfo(
+    targetAddress: PublicKey,
+    tokenMintAddress: PublicKey,
+  ): Promise<{associatedAddress: PublicKey; exists: boolean}> {
+    const associatedAccount = await this.findAssociatedTokenAddress(
+      targetAddress,
+      tokenMintAddress,
+    );
+
+    try {
+      const accountInfo = await this.connection.getAccountInfo(associatedAccount);
+
+      return {
+        associatedAddress: associatedAccount,
+        exists: !!accountInfo,
+      };
+    } catch (err) {
+      return {
+        associatedAddress: associatedAccount,
+        exists: false,
+      };
+    }
+  }
+
     public async getPoolProgramId(poolAddress: PublicKey): Promise<PublicKey> {
         return this.getOwner(poolAddress);
     }
@@ -186,6 +272,7 @@ export class Actions {
           throw new Error('Can not find pool address');
         }
         console.log(accountInfo, '----account info');
+        console.log(Buffer.from(accountInfo.data),' -----data buffer');
         
         const result = PoolLayout.decode(Buffer.from(accountInfo.data));
         
