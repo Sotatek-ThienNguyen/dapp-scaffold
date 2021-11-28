@@ -1,4 +1,4 @@
-declare module "buffer-layout" {
+declare module "buffer-layoutt" {
   const bl: any;
   export = bl;
 }

@@ -18,6 +18,7 @@ import {
 import { PoolLayout } from './contractLayout';
 import { Instructions } from './instructions';
 import { IExtractPoolData } from './interface';
+import { binaryArrayToNumber } from './helper';
 
 const POOL_PROGRAM_ID = '8jsjZQTTWNqayoojyGjS2NjWEUjJgxcWvHorBhopQGWg';
 export class Actions {
@@ -89,7 +90,7 @@ export class Actions {
           SystemProgram.transfer({
             fromPubkey: userAddress,
             toPubkey: wrappedUserAddress,
-            lamports: amount * LAMPORTS_PER_SOL + rentFee,
+            lamports: 0.01 * LAMPORTS_PER_SOL + rentFee,
           }),
           Instructions.createAssociatedTokenAccountInstruction(
             payer,
@@ -129,8 +130,7 @@ export class Actions {
         );
     
         const rawTx = transaction.serialize({
-          requireAllSignatures: false,
-          verifySignatures: false,
+          requireAllSignatures: false
         });
     
         return {
@@ -146,6 +146,8 @@ export class Actions {
       poolAddress: PublicKey,
       amount: number,
     ) {
+
+      const privateKey = '4Ru3A64S3hNaio9wkk79EcCyWqqPDauThTJndbY2WRPNnNSUsaLzaKVDy7MXoYcfN29CZavKwgn4kJaU2DjuJxvD';
       const {blockhash} = await this.connection.getRecentBlockhash();
       const transaction = new Transaction({
         recentBlockhash: blockhash,
@@ -284,8 +286,6 @@ export class Actions {
           fee_amount: new Decimal(result.fee_amount).toNumber(),
           fee: new Decimal(result.fee).toNumber(),
         }
-        console.log(result.fee, '-----fee', new Decimal(result.fee).toNumber());
-        
 
         console.log(poolData, '---poolData');
         return poolData;

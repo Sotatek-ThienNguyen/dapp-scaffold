@@ -1,3 +1,4 @@
+// @ts-ignore
 import * as BufferLayout from 'buffer-layout';
 // tslint:disable-next-line:no-duplicate-imports
 import * as Layout from './layout';

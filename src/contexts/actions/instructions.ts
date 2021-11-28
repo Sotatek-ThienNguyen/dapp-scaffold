@@ -1,6 +1,7 @@
 import {TOKEN_PROGRAM_ID} from '@project-serum/serum/lib/token-instructions';
 import { AccountLayout, ASSOCIATED_TOKEN_PROGRAM_ID, Token, u64 } from "@solana/spl-token";
 import { AccountMeta, Connection, Keypair, PublicKey, SystemProgram, SYSVAR_RENT_PUBKEY, TransactionInstruction } from "@solana/web3.js";
+// @ts-ignore
 import * as BufferLayout from 'buffer-layout';
 import { InitPoolLayout, PoolLayout } from "./contractLayout";
 import * as Layout from './layout';

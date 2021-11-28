@@ -1,3 +1,4 @@
+// @ts-ignore
 import * as BufferLayout from 'buffer-layout';
 import assert from 'assert';
 import BN from 'bn.js';
