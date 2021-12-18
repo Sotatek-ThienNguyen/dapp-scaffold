@@ -1,16 +1,21 @@
 import React, { useCallback } from "react";
 import { useConnection } from "../../contexts/connection";
-import { Connection, LAMPORTS_PER_SOL, PublicKey, sendAndConfirmRawTransaction, SystemProgram, Transaction } from "@solana/web3.js";
+import { Connection, Keypair, LAMPORTS_PER_SOL, PublicKey, sendAndConfirmRawTransaction, sendAndConfirmTransaction, SystemProgram, Transaction } from "@solana/web3.js";
 import { notify } from "../../utils/notifications";
 import { ConnectButton } from "./../../components/ConnectButton";
 import { LABELS } from "../../constants";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { createTokenWithWalletAdapter } from "../../contexts/authentication/authentication";
-import { Actions } from "../../contexts/actions/actions";
+// import { Actions, ActionsStaking, POOL_PROGRAM_ID } from "@solbank/staking-test";
 import { Account } from "@solana/web3.js";
 import { WRAPPED_SOL_MINT } from "@project-serum/serum/lib/token-instructions";
 import { sleep } from "../../contexts/actions/helper";
 import {binaryArrayToNumber} from '../../contexts/actions/helper';
+import { ActionsStaking } from "src/sdk/staking-sdk/actions.staking";
+import { Actions } from "src/sdk";
+
+export const POOL_CONTRACT_ADDRESS = 'FEmYwTTdM1SrUmtYu2xZjYwDXxVRXKjKDJHe2L1siWTL';
+// export const POOL_CONTRACT_ADDRESS = 'D4G9HBNhPa8upFh3gDwbFXUxiwPF1Y5izy7DMUXaDnv1';
 
 export const FaucetView = () => {
   const connection = useConnection();
@@ -21,109 +26,19 @@ export const FaucetView = () => {
       if (!publicKey) {
         return;
       }
-
-      const actions = new Actions(connection);
-      await actions.readPool(new PublicKey('Aqycw1YgXp1oYgEbCd8xcPePcxRLX8zon2bkET1x1XrD'));
-      // const unit8 = Uint8Array.from([70, 110, 188, 1, 0, 0, 0, 0]);
-      // const unit8_1 = Uint8Array.from([0, 0, 0, 0, 1, 188, 110, 70]);
-      // console.log(binaryArrayToNumber(unit8), 'le----- be', binaryArrayToNumber(unit8_1));
       
 
 
 
-
-      // -------------------------------TEST--------------
-
-      // const transaction = new Transaction()
-
-      // transaction.recentBlockhash = (
-      //   await connection.getRecentBlockhash()
-      // ).blockhash;
-      // transaction.feePayer = publicKey;
-      // let originalTx: any;
-      // if (signTransaction) {
-      //   originalTx = await signTransaction(transaction);
-      //   console.log(originalTx.signatures[0], '-----originalTx');
-      //   console.log(originalTx.signatures[0]?.publicKey.toString(), '-----originalTx pub');
-      //   console.log(originalTx.signatures[0]?.signature?.toString(), '-----originalTx sign');
-        
-      // }
-
-      // const serializedTx = originalTx.serialize();
-      // console.log({serializedTx: serializedTx.toString('base64')});
-
-      // const recoverTx = Transaction.from(
-      //   Buffer.from(serializedTx.toString(), 'base64'),
-      // );
-      // console.dir(recoverTx, '---recoverTx');
-      // console.log(recoverTx.signatures[0]?.publicKey?.toString(), '---recoverTx pub');
-      // console.log(recoverTx.signatures[0].signature?.toString(), '---recoverTx sig');
-      // console.log(recoverTx.signatures[0].signature as any, '---recoverTx sig');
-      
-      // const signatureOk = recoverTx.verifySignatures();
-      // console.log({signatureOk});
-
-
-
-
-
-
-
-      // ------------------------------------------------------
-      // -------------------------DEPOSIT------------------------
-      return new Promise((resolve, reject) => {
-        console.log('---start 1');
-        
-        const actions = new Actions(connection);
-        const POOL_CONTRACT_ADDRESS = 'Aqycw1YgXp1oYgEbCd8xcPePcxRLX8zon2bkET1x1XrD';
-        const poolProgramId = new PublicKey('8jsjZQTTWNqayoojyGjS2NjWEUjJgxcWvHorBhopQGWg');
-        let serializedTx: any;
-        return actions.deposit(publicKey, publicKey, new PublicKey(POOL_CONTRACT_ADDRESS), 1.03)
-        .then(({ rawTx, unsignedTransaction }) => {
-          serializedTx = rawTx
-          return parseAndSendTransaction(rawTx);
-        })
-        .then(txId => {
-          resolve(txId.toString());
-          console.log(txId, '-----------tx');
-          // encode to generate txNote
-
-          const recoverTx = Transaction.from(
-            Buffer.from(serializedTx.toString(), 'base64'),
-          );
-          console.log(recoverTx.signatures, '------------');
-          const signatureOk = recoverTx.verifySignatures();
-        console.log({signatureOk});
-          
-        })
-        .catch(err => {
-          console.log({ err });
-          if (!err.message || err.message !== 'Transaction cancelled') {
-            reject({
-              message: 'Error while join pool',
-              err,
-            });
-          } else {
-            reject({ message: 'Transaction cancelled' });
-          }
-        })
-        .finally(() => {
-        });
-      });
-
-      // --------------------------------------------------------
-
-
-
-      // -------------------------WITHDRAW------------------------
+      // -------------------------TEST SNAPSHOT------------------------
+      // const a = await connection.getAccountInfo(new PublicKey('GjW8uy6EvXC2C4M59TqAKJpkr7Ur8zfJWDyARp4Eg1nh'));
       // return new Promise((resolve, reject) => {
       //   console.log('---start withdraw');
         
       //   const actions = new Actions(connection);
-      //   const POOL_CONTRACT_ADDRESS = 'Aqycw1YgXp1oYgEbCd8xcPePcxRLX8zon2bkET1x1XrD';
-      //   const poolProgramId = new PublicKey('8jsjZQTTWNqayoojyGjS2NjWEUjJgxcWvHorBhopQGWg');
-      //   const withdrawAddress = new PublicKey('53MYtfWHdBWYR7WSjPkmcKYUiuTgbNi1QjiYuygWKXNh');
-      //   return actions.withdraw(publicKey, withdrawAddress, new PublicKey(POOL_CONTRACT_ADDRESS), 0.2)
+      //   const POOL_CONTRACT_ADDRESS = '3xF9j2d9ziTdVoznq3zYkspyQnDw6GEKWLFNATVNkDty';
+      //   console.log("🚀 ~ file: index.tsx ~ line 250 ~ returnnewPromise ~ POOL_CONTRACT_ADDRESS", POOL_CONTRACT_ADDRESS)
+      //   return actions.testSnapShot(publicKey, new PublicKey(POOL_CONTRACT_ADDRESS))
       //   .then(({ rawTx }) => {
       //     return parseAndSendTransaction(rawTx);
       //   })
@@ -149,6 +64,7 @@ export const FaucetView = () => {
       // });
 
       // --------------------------------------------------------
+
       
 
 
@@ -157,18 +73,97 @@ export const FaucetView = () => {
 
 
       //  /*---------------------CREATE POOL--------------------------------
-      // const actions = new Actions(connection);
-      // const { poolTokenXAccount, poolAccount, transaction, unsignedTransaction } = await actions.createPool(publicKey, WRAPPED_SOL_MINT, 3);
-      // const signedTxWithWallet = await signTransaction!(unsignedTransaction);
-      // const sign = signedTxWithWallet.signatures[0];
-      // transaction.addSignature(sign.publicKey, sign.signature as Buffer);
-      // await connection.sendRawTransaction(transaction.serialize(), {
-      //   skipPreflight: false,
-      //   preflightCommitment: 'confirmed',
-      // });
-      // await sleep(2000);
-      // console.log('token x: ', poolTokenXAccount.publicKey.toBase58(), '--- poolAccont', poolAccount.publicKey.toString(), '---', transaction, '---', unsignedTransaction);
+      const actions = new Actions(connection);
+      const { poolTokenXAccount, poolTokenYAccount, poolAccount, transaction, unsignedTransaction } =
+       await actions.createPool(publicKey, new PublicKey('8QFYMpK6sN3ggqwspCigBwLghrTkUeNXnwzwBTG8LZuw'), WRAPPED_SOL_MINT, publicKey);
+      const signedTxWithWallet = await signTransaction!(unsignedTransaction);
+      const sign = signedTxWithWallet.signatures[0];
+      transaction.addSignature(sign.publicKey, sign.signature as Buffer);
+      await connection.sendRawTransaction(transaction.serialize(), {
+        skipPreflight: false,
+        preflightCommitment: 'confirmed',
+      });
+      await sleep(2000);
+      console.log(
+        'token x: ', poolTokenXAccount.publicKey.toBase58(), 
+        'token y: ', poolTokenYAccount.publicKey.toBase58(), 
+        '--- poolAccont', poolAccount.publicKey.toString(),
+         'transaction---', transaction,
+          'unsignedTransaction---', unsignedTransaction);
       // ---------------------------END OF CREATE POOL-------------------------------------------------*/
+
+      // //  /*---------------------READ POOL--------------------------------
+      // const actions = new ActionsStaking(connection);
+      //  const res = await actions.readPool(new PublicKey('Gb9LukrrGzQivWKdqURUQjyQEwnLtMvozHVWd765W5QK'));
+      //  console.log(res, '--poolData');
+       
+
+      // //  /*---------------------UPDATE PENALTY--------------------------------
+      // const actions = new ActionsStaking(connection);
+      // const { rawTx } =
+      //  await actions.updatePenaltyFee(publicKey, new PublicKey('Gb9LukrrGzQivWKdqURUQjyQEwnLtMvozHVWd765W5QK'), 10, 100);
+      // const txId = await parseAndSendTransaction(rawTx);
+      // console.log(txId);
+
+      // //  /*---------------------WITHDRAW REWARD (VERIFYING)--------------------------------
+      // const actions = new ActionsStaking(connection);
+      // const { rawTx } =
+      //  await actions.withdrawRewardByUser(publicKey, publicKey, new PublicKey(POOL_CONTRACT_ADDRESS));
+      // const txId = await parseAndSendTransaction(rawTx);
+      // console.log(txId);
+
+      // //  /*---------------------GET SOL TOKEN (VERIFYING)--------------------------------
+      // const actions = new Actions(connection);
+      // const { rawTx } = await actions.deposit(publicKey, publicKey, 2);
+      // const txId = await parseAndSendTransaction(rawTx);
+      // console.log(txId);
+
+
+
+      // //  /*---------------------SEND REWARD BY ADMIN (FAIL)--------------------------------
+      // const actions = new ActionsStaking(connection);
+      // const { rawTx } =
+      //  await actions.sendRewardToStakePoolByAdmin(publicKey, publicKey, new PublicKey(POOL_CONTRACT_ADDRESS), 0.5);
+      // const txId = await parseAndSendTransaction(rawTx);
+      // console.log(txId);
+
+      // //  /*---------------------CLOSE ACCOUNT--------------------------------
+      // const actions = new Actions(connection);
+      // const { rawTx } =
+      //  await actions.closeAssociatedTokenAccount(publicKey, publicKey, WRAPPED_SOL_MINT);
+      // const txId = await parseAndSendTransaction(rawTx);
+      // console.log(txId);
+
+
+      // //  /*---------------------INIT MEMBER--------------------------------
+      // const actions = new ActionsStaking(connection);
+      // const { rawTx } =
+      //  await actions.initStakeMember(publicKey, publicKey, new PublicKey(POOL_CONTRACT_ADDRESS));
+      // const txId = await parseAndSendTransaction(rawTx);
+      // console.log(txId);
+    
+
+      //  /*---------------------READ CLAIM AMOUNT --------------------------------
+      // const actions = new ActionsStaking(connection);
+      // const res =
+      //  await actions.readMemberData(publicKey, new PublicKey(POOL_CONTRACT_ADDRESS));
+      // console.log(res);
+
+      //  /*---------------------STAKE --------------------------------
+      // const actions = new ActionsStaking(connection);
+      // const { rawTx } =
+      //  await actions.stakeByUser(publicKey, publicKey, new PublicKey(POOL_CONTRACT_ADDRESS), 50);
+      // const txId = await parseAndSendTransaction(rawTx);
+      // console.log(txId);
+
+      //  /*---------------------UNSTAKE --------------------------------
+      // const actions = new ActionsStaking(connection);
+      // const { rawTx } =
+      //  await actions.unStakeByUser(publicKey, publicKey, new PublicKey(POOL_CONTRACT_ADDRESS), 30);
+      // const txId = await parseAndSendTransaction(rawTx);
+      // console.log(txId);
+      
+      // ---------------------------END-------------------------------------------------*/
 
       
     } catch (error) {
@@ -193,12 +188,12 @@ export const FaucetView = () => {
   async function parseAndSendTransaction(rawTransaction: any): Promise<string> {
     const transactionBuffer = Buffer.from(rawTransaction, 'base64');
     const transaction = Transaction.from(transactionBuffer);
-    const txId = await sendAndConfirmTransaction(transaction);
+    const txId = await sendAndConfirmTransactionn(transaction);
     return txId;
   }
 
 
-  async function sendAndConfirmTransaction(
+  async function sendAndConfirmTransactionn(
     transaction: Transaction,
     ...signers: Account[]
   ): Promise<string> {
