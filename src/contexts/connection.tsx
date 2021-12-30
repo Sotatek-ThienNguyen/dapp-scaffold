@@ -8,8 +8,6 @@ import {
   TransactionInstruction,
 } from "@solana/web3.js";
 import React, { useContext, useEffect, useMemo, useState } from "react";
-import { notify } from "./../utils/notifications";
-import { ExplorerLink } from "../components/ExplorerLink";
 import { setProgramIds } from "../utils/ids";
 import { cache, getMultipleAccounts, MintParser } from "./accounts";
 import { TokenListProvider, ENV as ChainID, TokenInfo } from "@solana/spl-token-registry";
@@ -203,32 +201,6 @@ export function useSlippageConfig() {
   return { slippage, setSlippage };
 }
 
-const getErrorForTransaction = async (connection: Connection, txid: string) => {
-  // wait for all confirmation before geting transaction
-  await connection.confirmTransaction(txid, "max");
-
-  const tx = await connection.getParsedConfirmedTransaction(txid);
-
-  const errors: string[] = [];
-  if (tx?.meta && tx.meta.logMessages) {
-    tx.meta.logMessages.forEach((log) => {
-      const regex = /Error: (.*)/gm;
-      let m;
-      while ((m = regex.exec(log)) !== null) {
-        // This is necessary to avoid infinite loops with zero-width matches
-        if (m.index === regex.lastIndex) {
-          regex.lastIndex++;
-        }
-
-        if (m.length > 1) {
-          errors.push(m[1]);
-        }
-      }
-    });
-  }
-
-  return errors;
-};
 
 export const sendTransaction = async (
   connection: Connection,

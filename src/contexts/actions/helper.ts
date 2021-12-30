@@ -2,14 +2,6 @@ export function sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-const binaryArrayToBoolean = (arr: Uint8Array): boolean => {
-    const value = binaryArrayToNumber(arr);
-    if (value === 0) {
-      return false;
-    }
-  
-    return true;
-  };
 
 export  function binaryArrayToNumber(arr: Uint8Array): number  {
     let len = arr.length;
