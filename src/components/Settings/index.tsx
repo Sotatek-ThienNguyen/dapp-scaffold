@@ -5,6 +5,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 
 export const Settings = () => {
   const { connected, disconnect } = useWallet();
+  // @ts-ignore
   const { endpoint, setEndpoint } = useConnectionConfig();
 
   return (

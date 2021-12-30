@@ -30,7 +30,8 @@
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
-    "incremental": true
+    "incremental": true,
+    "checkJs": false
   },
   "include": [
     "src"
