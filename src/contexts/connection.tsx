@@ -52,7 +52,7 @@ interface ConnectionConfig {
   slippage: number;
   setSlippage: (val: number) => void;
   env: ENV;
-  setEndpoint: (val: string) => void;
+  setEndpoint: (val: string | number) => void;
   tokens: TokenInfo[];
   tokenMap: Map<string, TokenInfo>;
 }
