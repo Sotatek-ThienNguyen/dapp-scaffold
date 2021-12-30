@@ -33,7 +33,6 @@
     "@solana/wallet-adapter-react": "^0.13.1",
     "@solana/wallet-adapter-wallets": "^0.11.3",
     "@solana/web3.js": "^1.22.0",
-    "@solbank/staking-test": "file:../../0-solbank/phase2/solbank-staking-sdk",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.5.0",
     "@types/react-router-dom": "^5.1.6",
