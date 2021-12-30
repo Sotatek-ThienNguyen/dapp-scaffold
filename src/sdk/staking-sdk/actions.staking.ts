@@ -316,6 +316,10 @@ export class ActionsStaking {
             exists: isExisted,
             associatedAddress: stakePoolMemberAccount,
         } = await this.getStakePoolAssociatedAccountInfo(userAddress, stakePoolAddress);
+        console.log(userTokenXAddress.toString(), '---toS');
+        console.log(stakePoolMemberAccount.toString(), '---stakePoolMemberAccount');
+        console.log(userAddress.toString(), stakePoolAddress.toString(), '---stakePoolMemberAccount');
+        
 
         if (!isExisted) {
             console.log('not exist');

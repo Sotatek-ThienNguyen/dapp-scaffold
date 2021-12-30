@@ -14,7 +14,8 @@ import {binaryArrayToNumber} from '../../contexts/actions/helper';
 import { ActionsStaking } from "src/sdk/staking-sdk/actions.staking";
 import { Actions } from "src/sdk";
 
-export const POOL_CONTRACT_ADDRESS = 'FEmYwTTdM1SrUmtYu2xZjYwDXxVRXKjKDJHe2L1siWTL';
+// export const POOL_CONTRACT_ADDRESS = '8u2hWyVqvJ9h3mUnkn1w4JbpENJ1JEWEE7V42U2RWcKY';
+export const POOL_CONTRACT_ADDRESS = 'ChNZGUNxsuq9RD4dbNiLtnH6JHgrrH2RGca8pso5taAo';
 // export const POOL_CONTRACT_ADDRESS = 'D4G9HBNhPa8upFh3gDwbFXUxiwPF1Y5izy7DMUXaDnv1';
 
 export const FaucetView = () => {
@@ -94,7 +95,7 @@ export const FaucetView = () => {
 
       // //  /*---------------------READ POOL--------------------------------
       // const actions = new ActionsStaking(connection);
-      //  const res = await actions.readPool(new PublicKey('Gb9LukrrGzQivWKdqURUQjyQEwnLtMvozHVWd765W5QK'));
+      //  const res = await actions.readPool(new PublicKey(POOL_CONTRACT_ADDRESS));
       //  console.log(res, '--poolData');
        
 
@@ -151,8 +152,8 @@ export const FaucetView = () => {
 
       //  /*---------------------STAKE --------------------------------
       // const actions = new ActionsStaking(connection);
-      // const { rawTx } =
-      //  await actions.stakeByUser(publicKey, publicKey, new PublicKey(POOL_CONTRACT_ADDRESS), 50);
+      
+      //  const {rawTx} = await actions.stakeByUser(publicKey, publicKey, new PublicKey(POOL_CONTRACT_ADDRESS), 50);
       // const txId = await parseAndSendTransaction(rawTx);
       // console.log(txId);
 
