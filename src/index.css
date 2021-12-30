@@ -24,3 +24,24 @@ code {
   background-repeat: no-repeat;
   margin: 0 auto 0 auto;
 }
+
+.container {
+  margin: auto;
+  margin-top: 1%;
+}
+
+.inputContainer {
+  width: 900px;
+  display: flex;
+  margin-bottom: 8px;
+}
+
+.inputName {
+  width: 30%;
+  text-align: right;
+  padding-right: 10px;
+}
+
+.tokenMint {
+  width: 70%;
+}

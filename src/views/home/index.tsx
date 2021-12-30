@@ -49,7 +49,7 @@ export const HomeView = () => {
       </Col>
       <Col span={12}>
         <Link to="/faucet">
-          <Button>Faucet</Button>
+          <Button>Create Pool</Button>
         </Link>
       </Col>
       <Col span={24}>

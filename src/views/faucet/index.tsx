@@ -66,26 +66,27 @@ export const FaucetView = () => {
 
 
   return (
-    <div className="flexRow" style={{ flex: 2 }}>
+    <div className="container">
       <div>
         <div className="deposit-input-title" style={{ margin: 10 }}>
           {LABELS.FAUCET_INFO}
         </div>
         <div className="thien">
-          <div className="tokenX">
-            Token X Mint:
-            <input type="text" style={{color:"black"}} value={tokenX} onChange={handleChangeTokenX}></input>
+          <div className="inputContainer">
+            <label className="inputName">Token X Mint:</label>
+            <input className="tokenMint" type="text" style={{color:"black"}} value={tokenX} onChange={handleChangeTokenX}></input>
           </div>
-          <div className="tokenY">
-            Token Y Mint (SOL):
-            <input type="text" style={{color:"black"}} value={tokenY} onChange={handleChangeTokenY}></input>
+          <div className="inputContainer">
+            <label className="inputName">Token Y Mint (SOL):</label>
+            <input className="tokenMint" type="text" style={{color:"black"}} value={tokenY} onChange={handleChangeTokenY}></input>
           </div>
           <ConnectButton type="primary" onClick={createPool}>
             {LABELS.GIVE_SOL}
           </ConnectButton>
         </div>
-
-        <p>POOL ACCOUNT: {poolAddress}</p>
+        <hr style={{marginTop: "10px"}}></hr>
+        <p>RESULT</p>
+        {poolAddress ? <p>POOL ACCOUNT: {poolAddress}</p> : ''}
       </div>
     </div>
   );

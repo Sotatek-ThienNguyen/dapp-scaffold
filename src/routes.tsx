@@ -45,8 +45,7 @@ export function Routes() {
             <MarketProvider>
               <AppLayout>
                 <Switch>
-                  <Route exact path="/" component={() => <HomeView />} />
-                  <Route exact path="/faucet" children={<FaucetView />} />
+                  <Route exact path="/" children={<FaucetView />} />
                 </Switch>
               </AppLayout>
             </MarketProvider>
