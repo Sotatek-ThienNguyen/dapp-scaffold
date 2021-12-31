@@ -1,6 +1,6 @@
 FROM node:14
 
-ENV REACT_APP_PORT=4001
+ENV PORT=4001
 
 WORKDIR /app
 COPY package.json .
