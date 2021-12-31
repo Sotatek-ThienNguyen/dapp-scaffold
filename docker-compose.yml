@@ -3,4 +3,4 @@ services:
   create-staking-pool:
     build: .
     ports:
-      - '8006:4001'
+      - '8096:4001'
