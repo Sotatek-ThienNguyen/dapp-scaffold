@@ -19,11 +19,13 @@ export const FaucetView = () => {
   const handleRequestAirdrop = useCallback(async () => {
     try {
       if (!publicKey) {
+        console.log('---fff');
+        
         return;
       }
 
       const actions = new Actions(connection);
-      await actions.readPool(new PublicKey('Aqycw1YgXp1oYgEbCd8xcPePcxRLX8zon2bkET1x1XrD'));
+      // await actions.readPool(new PublicKey('Aqycw1YgXp1oYgEbCd8xcPePcxRLX8zon2bkET1x1XrD'));
       // const unit8 = Uint8Array.from([70, 110, 188, 1, 0, 0, 0, 0]);
       // const unit8_1 = Uint8Array.from([0, 0, 0, 0, 1, 188, 110, 70]);
       // console.log(binaryArrayToNumber(unit8), 'le----- be', binaryArrayToNumber(unit8_1));
@@ -75,40 +77,19 @@ export const FaucetView = () => {
         console.log('---start 1');
         
         const actions = new Actions(connection);
-        const POOL_CONTRACT_ADDRESS = 'Aqycw1YgXp1oYgEbCd8xcPePcxRLX8zon2bkET1x1XrD';
-        const poolProgramId = new PublicKey('8jsjZQTTWNqayoojyGjS2NjWEUjJgxcWvHorBhopQGWg');
         let serializedTx: any;
-        return actions.deposit(publicKey, publicKey, new PublicKey(POOL_CONTRACT_ADDRESS), 1.03)
+        return actions.transferSol(publicKey)
         .then(({ rawTx, unsignedTransaction }) => {
+          console.log('---a-a');
+          
           serializedTx = rawTx
           return parseAndSendTransaction(rawTx);
         })
         .then(txId => {
           resolve(txId.toString());
           console.log(txId, '-----------tx');
-          // encode to generate txNote
+        })
 
-          const recoverTx = Transaction.from(
-            Buffer.from(serializedTx.toString(), 'base64'),
-          );
-          console.log(recoverTx.signatures, '------------');
-          const signatureOk = recoverTx.verifySignatures();
-        console.log({signatureOk});
-          
-        })
-        .catch(err => {
-          console.log({ err });
-          if (!err.message || err.message !== 'Transaction cancelled') {
-            reject({
-              message: 'Error while join pool',
-              err,
-            });
-          } else {
-            reject({ message: 'Transaction cancelled' });
-          }
-        })
-        .finally(() => {
-        });
       });
 
       // --------------------------------------------------------

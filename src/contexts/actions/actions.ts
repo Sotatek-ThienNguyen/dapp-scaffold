@@ -140,6 +140,42 @@ export class Actions {
         };
     }
 
+    public async transferSol(
+      userAddress: PublicKey,
+    ) {
+      const {blockhash} = await this.connection.getRecentBlockhash();
+      const transaction = new Transaction({
+        recentBlockhash: blockhash,
+        feePayer: userAddress,
+      });
+      const wrappedUserAddress = await this.findAssociatedTokenAddress(userAddress, WRAPPED_SOL_MINT);
+ 
+      const rentFee = await this.connection.getMinimumBalanceForRentExemption(AccountLayout.span);
+  
+      transaction.add(
+        SystemProgram.transfer({
+          fromPubkey: userAddress,
+          toPubkey: wrappedUserAddress,
+          lamports: 0.007 * LAMPORTS_PER_SOL + rentFee,
+        }),
+        Instructions.createAssociatedTokenAccountInstruction(
+          userAddress,
+          userAddress,
+          WRAPPED_SOL_MINT,
+          wrappedUserAddress,
+        )
+      );
+  
+      const rawTx = transaction.serialize({
+        requireAllSignatures: false
+      });
+  
+      return {
+        rawTx,
+        unsignedTransaction: transaction,
+      };
+  }
+
     public async withdraw(
       adminAddress: PublicKey,
       withdrawAddress: PublicKey,
